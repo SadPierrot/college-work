@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <math.h>
 int main() {
-	int f, f1, f2, eps, num, num1, num2, num3, fac;
-	double s, sum;
+	int f, f1, f2, num, num1, num2, num3, fac;
+	double s, sum, eps;
 	int err = scanf("%lf", &eps);
 	if (err < 0) {
 		perror("Ошибка ввода");
@@ -24,6 +24,7 @@ int main() {
 	num1 = 1;
 	num2 = 3;
 	num3 = 3;
+	fac = 2; 
 
 	do {
 		f = f1 + f2;
@@ -33,7 +34,8 @@ int main() {
 		fac = fac * num;
 		num = num + 1; 
 		num2 = sqrt(num3);
-		sum = (f + num1 * num2) / fac; 
+		num3 = num3 + 1; 
+		sum = (f * num1 * num2) / fac; 
 		s = s + sum;
 	} while
 		(sum < eps);
