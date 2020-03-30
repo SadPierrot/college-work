@@ -1,9 +1,12 @@
-//3-2-3 ВАРИАНТ
+//3-2-3 Practical work
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 static int values[6];
 static char names[6][44];
+static int var[6];
 enum e_flags //Никак не работает, это просто массив, только вместо целых чисел тут биты.
 {
     expr_top = 1 << 0, //start :shrug:
@@ -13,86 +16,142 @@ enum e_flags //Никак не работает, это просто масси�
     expr_var = 1 << 4, //var word flag
     expr_char_write = 1 << 5, //флаг записи переменной
     expr_eval = 1 << 6,
+//    expr_sign = 1 << 7,
     expr_end = 1 << 7, //end :shrug:
 };
-#define ischar(c) c >= 'a' && c <= 'z'
-#define isnum(c) c >= '0' && c <= '9'
+#define isnum(c) (c >= '0' && c <= '9')
+#define ischar(c) ((c >= 'a' && c <= 'z') || c == '_')
 
 #define ARG_PARSE_ERROR -3
 
 typedef enum e_flags e_flags_t;
-int handler(char* expr, e_flags_t* flags)
+int lookup(/*e_flags_t* state,*/ const char* name, int index)
 {
-    e_flags_t current_state = *flags;
-    int index = 0; //количество переменных в строке. 
-    int idx_var = 0; //индекс текущего элемента в переменной
-    int res = 0; //хуй знает че
-    char tmp[44]=""; //текущая переменная
-    char flag = -1; //хуй знает че
-    int op1=0; //значение первой переменной
-    int op2=0; //значение второй переменной
-    char interm[44] = ""; 
-    char checked = 0; //костыль для одиночной записи
-    unsigned long sz = 0; 
-    char end_flag = 0;
-    while(!end_flag || *expr)
+    for(int i = 0; i <= index; i++)
+    {
+        if(strcmp(names[i], name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+const char* handle_arg(const char* expr, char* ret_name)
+{
+    //int i =0;
+    while(ischar(*expr))
+    {
+        *ret_name = *expr;
+        expr++;
+        ret_name++;
+        //i++;
+    }
+    return expr;
+}
+const char* handle_num(/*e_flags_t* state,*/ const char* expr, int* num, char sign)
+{
+    int res = 0;
+    while(isnum(*expr)) {
+        int n = *expr - '0';
+        expr++;
+        res = 10 * res + n;
+    }
+    *num = sign ? -res : res;
+//    if(*state & expr_sign) {
+//        *state &= ~(expr_sign);
+//        *num = -res;
+//    }
+//    else *num = res;
+
+    return expr;
+}
+int handler(const char* expr)
+{
+    e_flags_t current_state = expr_top;
+    int num_args = 0; //количество переменных в строке.
+    char* mod_ptr = strstr(expr, "mod"); //mod ptr
+    const char* preserved_ptr = mod_ptr; //preserved ptr to "mod" str
+    int i = 0; //индекс текущего элемента в переменной
+    int arg_value = 0; //текущее число
+    char current_var[44] = ""; //текущая переменная
+    int operand_num = 0; //index of var array at the start of the file
+    char saved_flag = 0; //костыль для одиночной записи
+    int preserved_index = -1; //preserving index of variable var=imm mod imm
+    char sign = 0; //sign flag, if set number is below zero
+    int arg_index = 0; //stored index of variable, if found in "names" array otherwise -1
+    char back = -1;
+    int arg_arg = 0;
+    while(*expr)
     {
         switch (current_state) {
             case expr_top:
-                if(*expr == ' ')
+                while(*expr == ' ')
                     expr++;
-                else current_state = expr_const;
+                while(*mod_ptr != '=')
+                    mod_ptr--;
+                current_state = expr_const;
                 break;
             case expr_const:
-                if(strncmp(expr, "const", 4) == 0) {
+                if(strncasecmp(expr, "const", 4) == 0) {
                     expr += 5; //skipping "const" keyword
                     current_state = expr_token; //change state to a token parse
-                } else { //if not found
+                } else {
                     perror("const expected");
                     current_state = expr_end;
                 }
                 break;
             case expr_token:
-                if(*expr == ' ')
+                while(*expr == ' ')
                     expr++;
-                else if(ischar(*expr)) 
+                 if(ischar(*expr))
                     current_state = expr_var;
                 else if(*expr == ',') {
-                    index++;
                     expr++;
                     current_state = expr_var;
                 }
                 else if(*expr == '=') {
+                    char if_mod = expr == mod_ptr ? 1 : 0;
+                    if(if_mod)
+                        current_state = expr_eval;
                     expr++;
-                    if(*expr == ' ')
-                        while(*expr == ' ') expr++;
-                    current_state = ischar(*expr) ? expr_eval : expr_num;
+                    while(*expr == ' ')
+                        expr++;
+                    if((isnum(*expr) || *expr == '-') && !if_mod) {
+                        if(*expr == '-') {
+                            sign = 1;
+                            expr++;
+                        }
+                        current_state = expr_num;
+                    }
                 }
                 else if(*expr == ';' || *expr == '\0')
                     current_state = expr_end;
                 break;
             case expr_char_write:
-                if(ischar(*expr)) {
-                    tmp[idx_var] = *expr;
-                    expr++;
-                    idx_var++;
-                }
-                if(flag == 0)
+            {
+                expr = handle_arg(expr, &current_var[0]);
+                if(back == 1)
                     current_state = expr_var;
-                else if(flag == 1)
+                else if(back == 0)
                     current_state = expr_eval;
+            }
                 break;
             case expr_var: {
-
+                while(*expr == ' ')
+                    expr++;
                 if(ischar(*expr)) {
-                    flag = 0;
+                    back = 1;
                     current_state = expr_char_write;
                 }
-                else if(*expr == ' ')
-                    expr++;
+                
                 else if(*expr == '=') {
-                    strncpy(&names[index][0], tmp, idx_var); //записываем в массив имен имя текущей переменной.
-                    idx_var = 0;
+                    arg_index = lookup(/*&current_state,*/ current_var, num_args);
+                    if(arg_index == -1) {
+                        strcpy(&names[num_args][0], current_var/*, sizeof(current_var)*/);
+                        memset(current_var, 0, i);
+                    }
+                        
+                    i = 0;
+                    back = 0;
                     current_state = expr_token;
                 }
                 else if(*expr == ';' || '\0')
@@ -100,110 +159,81 @@ int handler(char* expr, e_flags_t* flags)
             }
                 break;
             case expr_num: {
-
-                
-                int r = 0;
-                if(isnum(*expr)) { //аналогично ischar. Везде будет проверка на 0-9
-                    int n = expr[r] - '0';
-                    r++;
+                expr = handle_num(/*&current_state,*/ expr, &arg_value, sign);
+                while(*expr == ' ')
                     expr++;
-                    res = 10 * res + n;
-                }
-                else if(*expr == ' ')
-                    expr++;
-                else if(*expr == ',' || *expr == ';') {
-                    values[index] = res;
-                    res = 0;
+                if(*expr == ',' || *expr == ';') {
+                    if(arg_index != -1)
+                        values[arg_index] = arg_value;
+                    else {
+                        values[num_args] = arg_value;
+                        num_args++;
+                    }
+                    arg_value = 0;
+                    sign = 0;
                     current_state = expr_token;
                 }
+
             }
                 break;
             case expr_eval: {
-                if(*tmp && !checked) {
-                    sz = strlen(tmp);  //это длинна переменной в которой будет выражение(ab=bc mod db. Где tmp=ab) 
-                    strncpy(&interm[0], tmp, sz); //сохраняем эту переменную, она понадобится нам позже для присваивания ей значения.
-                    checked = 1; //ставим флаг в 1, нам нужно единожды записать ее
+                if(!saved_flag) {
+                    preserved_index = num_args;
+                    saved_flag = 1;
                 }
-                int op = strncmp(expr, "mod", 3); //каждый раз проверяем 3 последующие символа строки с mod
-                if(ischar(*expr) && op) { //если мы НЕ встретили "mod", но встретили букву, то
-                    flag = 1; //устанавливаем flag в 1, необходимо для перехода обратно в текущее состояние
-                    current_state = expr_char_write; //устанавливаем состояние записи первой переменной
-                }
-                else if(*expr == ' ')
+                while(*expr == ' ')
                     expr++;
-                else if(!op) //если мы встретили mod, то после него стоит название второй переменной 
-                 {
-                     expr+=3; //прыгаем через mod
-                     int j = 0; //текущий индекс элемента в массиве имен
-                     int ret = -1; //переменная определяющая нашли ли мы искомое название переменной в массиве имен
-                     char flag = 0; //для остановки поиска, если мы уже нашли искомое. ЕБАННЫЙ break нельзя использовать, поэтому так
-                     do {
-                         ret = strncmp(names[j], tmp, idx_var); //сравнивает текущее имя переменной в names с tmp 
-                         if(!ret && !flag) {
-                             flag = 1;
-                             idx_var=0; //если совпало, то затираем tmp
-                             memset(tmp,0, sizeof(tmp));
-                             op1 = values[j]; //и записываем значение этой переменной в нашу
-                         }
-                         j++; //увеличиваем счетчик
-                      } while (j < index || !flag); //пока не обошли все элементы массива names либо не установлен флаг 
-                 }
-                else if(*expr == ';' || *expr == ',') //если мы встретили символ конца выражения
+                bool if_mod = expr == preserved_ptr;
+                if(isnum(*expr) || *expr == '-') {
+                    if(*expr == '-') {
+                        sign = 1;
+                        expr++;
+                    }
+                    else sign = 0;
+//                       current_state = expr_num | expr_sign;
+                    expr = handle_num(/*&current_state,*/ expr, &var[operand_num], sign);
+                    operand_num++;
+                }
+                else if(ischar(*expr) && !if_mod)
                 {
-                    int j = 0; //текущий индекс элемента в массиве имен
-                    int ret = -1; //переменная определяющая нашли ли мы искомое название переменной в массиве имен
-                    int _ret = -1; //переменная определяющая нашли ли мы искомое название переменной в массиве имен. Эта для ранее записанной ab. См. начало этого case
-                    char flag = 0; //флаг, показывающий, что мы нашли имя текущей переменной
-                    char _flag = 0; //тоже самое, но для переменной хранящей выражение
-                    while (j <= index) {
-                        ret = strncmp(names[j], tmp, idx_var); //ищем текущую в массиве
-                        _ret = strncmp(names[j], &interm[0], sz); //ищем переменную содержающую выражение
-                        if(!ret && !flag) { //это проверки для текущей
-                            flag = 1; //если нашли, ставим флаг, что бы больше не заходить сюда
-                            idx_var=0; //обнуляем индекс, хуй знает почему я не мемсетнул тут, ошибка наверное
-                            op2 = values[j]; //записываем значение второй переменной в нашу
-                        }
-                        if(!_ret && !_flag) { //это для выражения
-                            sz = j; //если нашли -- то запоминаем индекс
-                            _flag = 1; //ставим флаг
-                        }
-                    
-                        j++;
+                    back = 0;
+                    arg_arg++;
+                    memset(&current_var[0], 0, sizeof(current_var));
+                    expr = handle_arg(expr, &current_var[0]);
+                    var[operand_num] = values[lookup(current_var, num_args)];
+                    operand_num++;
+                }
+                if(if_mod)
+                    expr+=3;
+
+                else if(*expr == ';' || *expr == ',')
+                {
+                    if(preserved_index >= 0) {
+                        values[preserved_index] = var[0] % var[1];
+                        current_state = *expr == ';' ? expr_end : expr_token;
                     }
-                    if(_flag) //предположительно все нашли
-                    {
-                        if(op1 && op2) { //проверяем деление на 0 и 0 % n
-                            values[sz] = op1 % op2; //если все ок, то делим и записываем в индекс, который ранее запомнили. Это будет индекс переменной ab
-                            current_state = *expr == ';' ? expr_end : expr_token;
-                        }
-                        else { //иначе это будет деление на ноль
-                            perror("division by zero");
-                            index = 0; 
-                            current_state = expr_end; //заканчиваем;
-                        }
-                    }
+                    else current_state = expr_end;
                 }
                 
             }
                 break;
-            case expr_end: //если попали сюда, то встретили конечный символ
-                return index;//end_flag = 1; //ставим флаг в 1
-                //break; //бежим нахуй отсюда
+            case expr_end:
+                return num_args;
         }
     }
-    return index;
+    return num_args;
 }
 int main() {
-    e_flags_t flags = expr_top;
-    char buf[1024]="";
+    char buf[1024]="const _ = -5, __ = -100, cc = _ mod -100;";
     int ret = 0;
-    fgets(buf, sizeof(buf), stdin);
+    //fgets(buf, sizeof(buf), stdin);
     if(*buf == '\0') {
         ret = -1;
         perror("[fgets] error while read");
     }
-    int arg_count = handler(buf, &flags);
-    if(!arg_count)
+    int arg_count = -1;
+    arg_count = handler(buf);
+    if(arg_count < 0)
     {
         perror("error while handling args");
         ret = ARG_PARSE_ERROR;
