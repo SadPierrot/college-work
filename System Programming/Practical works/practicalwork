@@ -1,0 +1,223 @@
+//TODO:
+// 1) Сделать кликабельные стрелочки, вот таблица аски https://studfile.net/preview/894070/page:3/
+// 2) Сейчас есть переход от "Создать новый файл", надо сделать "Открыть файл" p.s Вкладка открыть, а не создать
+// 3) Если останется время, то доделай кнопки справка и выход, чтобы был переход на сл страничку
+
+// Счастья и печенек :3
+uses crt;
+
+///глобальный_ключ
+var key:string;
+///счётчики
+var i0,i1,i2,i3,i4,i5,i6,i7,i8,i9:integer;
+///позиция в таблице
+x,y:integer;
+///символ
+var c1,c2:char;
+///код_символа
+var w1:word;
+///текст
+var t1,t2:string;
+
+begin
+key:='main_menu';
+
+while(key<>'')do begin
+
+ //Первая ступень (Открыть / Справка / Выйти)
+ while(key='main_menu')do begin
+ writeln(w1);
+ clrscr;
+ for i1:=1 to 10 do writeln;
+ t1:='                                                ';
+ t2:='                ';
+ textcolor(15);
+ write(t1);write(#201);for i1:=1 to 17 do write(#205);writeln(#187);
+ write(t1);write(#186);write(t2);writeln(' '#186);
+ write(t1);write(#186'  '#201);for i1:=1 to 11 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);if(y=0)then textcolor(10);write('  Создать  ');textcolor(15);writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 11 do write(#205);writeln(#188'  '#186);
+
+
+ write(t1);write(#186'  '#201);for i1:=1 to 11 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);if(y=1)then textcolor(10);write('  Открыть  ');textcolor(15);writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 11 do write(#205);writeln(#188'  '#186);
+
+
+ write(t1);write(#186'  '#201);for i1:=1 to 11 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);if(y=2)then textcolor(10);write('  Справка  ');textcolor(15);writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 11 do write(#205);writeln(#188'  '#186);
+
+
+ write(t1);write(#186'  '#201);for i1:=1 to 11 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);if(y=3)then textcolor(10);write('   Выйти   ');textcolor(15);writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 11 do write(#205);writeln(#188'  '#186);
+ write(t1);write(#186);write(t2);writeln(' '#186);
+ write(t1);write(#200);for i1:=1 to 17 do write(#205);writeln(#188);
+ c1:=readkey;
+ w1:=ord(c1);
+
+ if(w1=13)then begin
+ case y of
+  0:key:='create';
+  1:key:='open';
+  2:key:='info';
+  3:key:='exit';
+ end;
+ x:=0;y:=0;t1:='';t2:='';
+ end;
+ //KHMP
+ if(c1=#72)then dec(y);
+ if(c1=#80)then inc(y);
+
+ {case w1 of
+ 13:case y of
+  0:begin key:='menu_A01';x:=0;y:=0;t1:='';t2:='';end
+  38:dec(y);
+  40:inc(y);
+  end;
+ end;}
+
+ if(y<0)then y:=3;if(y>3)then y:=0;
+ end;
+
+ while(key='create')do begin
+ clrscr;
+ t1:='                                        ';
+ for i1:=1 to 10 do writeln;
+ textcolor(10);
+ write(t1);write(#201);for i1:=1 to 35 do write(#205);writeln(#187);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#186);textcolor(15);write('   Введите название нового файла   ');textcolor(10);writeln(#186);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#186);textcolor(15);write('   ENTER - ВВОД                    ');textcolor(10);writeln(#186);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#186);textcolor(15);write('   ESC   - ВЫХОД                   ');textcolor(10);writeln(#186);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#200);for i1:=1 to 35 do write(#205);writeln(#188);
+ gotoxy(45,15);write(t2);
+ c1:=readkey;
+ w1:=ord(c1);
+ case w1 of
+  8:delete(t2,length(t2),1);
+  13:t2:='';
+  else if(length(t2)<26)then t2:=t2+c1;
+ end;
+ if(c1=#27)then begin key:='main_menu';x:=0;y:=0;t1:='';t2:='';end;
+ end;
+
+ while(key='open')do begin
+ clrscr;
+ t1:='                                        ';
+ for i1:=1 to 10 do writeln;
+ textcolor(10);
+ write(t1);write(#201);for i1:=1 to 35 do write(#205);writeln(#187);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#186);textcolor(15);write('   Введите название файла          ');textcolor(10);writeln(#186);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#186);textcolor(15);write('   ENTER - ВВОД                    ');textcolor(10);writeln(#186);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#186);textcolor(15);write('   ESC   - ВЫХОД                   ');textcolor(10);writeln(#186);
+ write(t1);write(#186);for i1:=1 to 35 do write(' ');writeln(#186);
+ write(t1);write(#200);for i1:=1 to 35 do write(#205);writeln(#188);
+ gotoxy(45,15);write(t2);
+ c1:=readkey;
+ w1:=ord(c1);
+ case w1 of
+  8:delete(t2,length(t2),1);
+  13:t2:='';
+  else if(length(t2)<26)then t2:=t2+c1;
+ end;
+ if(c1=#27)then begin key:='main_menu';x:=0;y:=0;t1:='';t2:='';end;
+ end;
+
+ while(key='info')do begin
+ clrscr;
+ for i1:=1 to 10 do writeln;
+ t1:='                                                ';
+ t2:='                ';
+ textcolor(15);
+ write(t1);write(#201);for i1:=1 to 17 do write(#205);writeln(#187);
+ write(t1);write(#186);write(t2);writeln(' '#186);
+ write(t1);write(#186'  '#201);for i1:=1 to 11 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);write('  Справка  ');writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 11 do write(#205);writeln(#188'  '#186);
+ write(t1);write(#186);write(t2);writeln(' '#186);
+ write(t1);write(#186'  '#201);for i1:=1 to 11 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);textcolor(10);write('   Выход   ');textcolor(15);writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 11 do write(#205);writeln(#188'  '#186);
+ write(t1);write(#186);write(t2);writeln(' '#186);
+ write(t1);write(#200);for i1:=1 to 17 do write(#205);writeln(#188);
+ c1:=readkey;
+ w1:=ord(c1);
+
+ if(w1=13)then begin
+ key:='main_menu';x:=0;y:=0;t1:='';t2:='';
+ end;
+ end;
+
+ while(key='exit')do begin
+ clrscr;
+ for i1:=1 to 10 do writeln;
+ t1:='                                         ';
+ t2:='                               ';
+ textcolor(15);
+ write(t1);write(#201);for i1:=1 to 32 do write(#205);writeln(#187);
+ write(t1);write(#186);write(t2);writeln(' '#186);
+ write(t1);write(#186'  '#201);for i1:=1 to 26 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);              write('  Вы точно хотите выйти?  ');writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 26 do write(#205);writeln(#188'  '#186);
+ write(t1);write(#186);write(t2);writeln(' '#186);
+ write(t1);write(#186'  '#201);for i1:=1 to 11 do write(#205);write(#187'  '#201);for i1:=1 to 11 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);if(x=0)then textcolor(10);write('    ДА     ');textcolor(15);write(#186'  '#186);if(x=1)then textcolor(10);write('    НЕТ    ');textcolor(15);writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 11 do write(#205);write(#188'  '#200);for i1:=1 to 11 do write(#205);writeln(#188'  '#186);
+ write(t1);write(#186);write(t2);writeln(' '#186);
+ write(t1);write(#200);for i1:=1 to 32 do write(#205);writeln(#188);
+ c1:=readkey;
+ w1:=ord(c1);
+
+ if(w1=13)then begin
+ case x of
+  0:key:='';
+  1:key:='main_menu';
+ end;
+ x:=0;y:=0;t1:='';t2:='';
+ end;
+
+ if(c1=#75)then dec(x);
+ if(c1=#77)then inc(x);
+
+ if(x<0)then x:=1;if(x>1)then x:=0;
+
+ end;
+
+ while(key='flights menu')do begin
+ clrscr;
+ for i1:=1 to 10 do writeln;
+ t1:='                                                ';
+ t2:='                ';
+ write(t1);write(#201);for i1:=1 to 17 do write(#205);writeln(#187);
+ write(t1);write(#186);write(t2);writeln(' '#186);
+ write(t1);write(#186'  '#201);for i1:=1 to 11 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);if(y=0)then textcolor(10);write('  Рейсы  ');textcolor(15);writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 11 do write(#205);writeln(#188'  '#186);
+
+
+ write(t1);write(#186'  '#201);for i1:=1 to 11 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);if(y=1)then textcolor(10);write('  Остановки  ');textcolor(15);writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 11 do write(#205);writeln(#188'  '#186);
+
+
+ write(t1);write(#186'  '#201);for i1:=1 to 11 do write(#205);writeln(#187'  '#186);
+ write(t1);write(#186'  '#186);if(y=2)then textcolor(10);write('   Остановки рейсов   ');textcolor(15);writeln(#186'  '#186);
+ write(t1);write(#186'  '#200);for i1:=1 to 11 do write(#205);writeln(#188'  '#186);
+ write(t1);write(#186);write(t2);writeln(' '#186);
+ write(t1);write(#200);for i1:=1 to 17 do write(#205);writeln(#188);
+ end;
+end;
+
+end.
