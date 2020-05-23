@@ -35,7 +35,7 @@ begin
 key:='main_menu';
 
 while(key<>'')do begin
-dir:='D:\111';
+dir:='C:\Users\mrtre\Desktop\practic_Oleg\';
 config:='config.txt';
 cash:='cash.txt';
 
@@ -119,7 +119,8 @@ while(key='create')do begin
    end;
    if(i2=0)then begin
    if(IOResult=0)then
-   append(f2)else rewrite(f2);
+   rewrite(f2)
+   else append(f2);
    writeln(f2,t2);
    close(f2);
    end;
