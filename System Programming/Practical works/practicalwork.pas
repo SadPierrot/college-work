@@ -113,14 +113,14 @@ while(key='create')do begin
    assign(f2,dir+config);
    i2:=0;
    {$I-}reset(f2);{$I+}
-   if(IOResult=0)then begin
+   i3:=IOResult;
+   if(i3=0)then begin
    while(eof(f2)=false)do begin readln(f2,t1);if(t1=t2)then i2:=1;end;
    close(f2);
    end;
    if(i2=0)then begin
-   if(IOResult=0)then
-   rewrite(f2)
-   else append(f2);
+   if(i3=0)then
+   append(f2)else rewrite(f2);
    writeln(f2,t2);
    close(f2);
    end;
