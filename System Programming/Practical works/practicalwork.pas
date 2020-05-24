@@ -35,9 +35,9 @@ begin
 key:='main_menu';
 
 while(key<>'')do begin
-dir:='C:\Users\mrtre\Desktop\practic_Oleg\';
-config:='config.txt';
-cash:='cash.txt';
+dir:='C:\Users\MF9744\Desktop\practic_Oleg\';
+config:='config';
+cash:='cash';
 
 while(key='main_menu')do begin
  clrscr;
@@ -107,7 +107,7 @@ while(key='create')do begin
   8:delete(t2,length(t2),1);
   13:if(t2<>'')and(t2<>'con')then begin
 
-   assign(f1,dir+t2+'.txt');
+   assign(f1,dir+t2);
    rewrite(f1);
    close(f1);
    assign(f2,dir+config);
@@ -172,7 +172,7 @@ while(key='open')do begin
   8:begin
   assign(f3,dir+cash);rewrite(f3);
   reset(f2);for i1:=0 to y do begin readln(f2,t1);if(i1<>y)then writeln(f3,t1);end;
-  assign(f1,dir+t1+'.txt');erase(f1);
+  assign(f1,dir+t1);erase(f1);
   while(eof(f2)=false)do begin readln(f2,t1);writeln(f3,t1);end;
   rewrite(f2);
   reset(f3);
